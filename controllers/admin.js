@@ -8,9 +8,10 @@ let index = async (ctx, next) => {
 let submit = async (ctx, next) => {
     let input = ctx.request.body.input;
 
-    let sql = "INSERT INTO codes (contents) VALUES (?)";
+    let sql = "INSERT INTO codes (contents, created_at, updated_at) VALUES (?, ?, ?)";
 
-    let sqlResult = await mysql.query(sql, input);
+    let time = parseInt(Date.parse(new Date()) / 1000)
+    let sqlResult = await mysql.query(sql, [input, time, time]);
     console.log(sqlResult.insertId);
     let url = `${config.url}/${sqlResult.insertId}`;
 
