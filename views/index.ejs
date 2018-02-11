@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>领取红包</title>
+    <style>
+        html {
+            background: url('/images/redbag.jpg');
+            background-repeat: no-repeat;
+            background-size: 100% 100vh;
+        }
+
+        .qrcode {
+            width: 70%;
+            margin: 30px auto 5px;
+        }
+
+        .qrcode img {
+            width: 100%;
+        }
+
+        .qrcode-tips {
+            color: #fff;
+            text-align: center;
+        }
+
+        .tips {
+            position: absolute;
+            top: 55%;
+            left: 18%;
+            color: #fff;
+            font-size: 24px;
+        }
+
+        .open {
+            position: absolute;
+            top: 76%;
+            left: 54%;
+            margin-left: -52px;
+            color: #fff;
+            font-size: 21px;
+        }
+    </style>
+</head>
+
+<body>
+    <div>
+        <div class="qrcode">
+            <img src="/images/qrcode.jpg" alt="">
+            <!-- <div id="qrcode"></div> -->
+            <div class="qrcode-tips">长按识别二维码领取现金红包</div>
+        </div>
+        <div class="tips">
+            恭喜发财，大吉大利！
+        </div>
+        <div class="open" id="open" data-clipboard-text="<%= code %>">
+            <span>拆红包</span>
+        </div>
+
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/1.7.1/clipboard.min.js"></script>
+    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script src="http://res.wx.qq.com/open/js/jweixin-1.2.0.js"></script>
+    <script>
+        wx.config({
+            debug: false, // 开启调试模式,调用的所有api的返回值会在客户端alert出来，若要查看传入的参数，可以在pc端打开，参数信息会通过log打出，仅在pc端时才会打印。
+            appId: "<%= jsInfo.appId %>", // 必填，公众号的唯一标识
+            timestamp: "<%= jsInfo.timestamp %>", // 必填，生成签名的时间戳
+            nonceStr: "<%= jsInfo.nonceStr %>", // 必填，生成签名的随机串
+            signature: "<%= jsInfo.signature %>", // 必填，签名
+            jsApiList: [
+                'onMenuShareTimeline', 'onMenuShareAppMessage', 'onMenuShareQQ', 'onMenuShareWeibo',
+                'onMenuShareQZone'
+            ] // 必填，需要使用的JS接口列表
+        });
+        wx.ready(function () {
+            var shareInfo = {
+                title: '送你0.1-99现金，秒提现！', // 分享标题,
+                desc: '不是优惠，是真的现金', //分享描述
+                link: 'http://tgy.dianzan800.com/', // 分享链接
+                imgUrl: 'http://ww1.sinaimg.cn/large/68e07a91ly1foci2zi4s2j20cb0dmgln.jpg', // 分享图标
+            }
+            wx.onMenuShareTimeline({
+                title: shareInfo.title, // 分享标题
+                link: shareInfo.link, // 分享链接，该链接域名或路径必须与当前页面对应的公众号JS安全域名一致
+                imgUrl: shareInfo.imgUrl, // 分享图标
+                success: function () {
+                    // 用户确认分享后执行的回调函数
+                },
+            });
+            wx.onMenuShareAppMessage({
+                title: shareInfo.title, // 分享标题
+                desc: shareInfo.desc, // 分享描述
+                link: shareInfo.link, // 分享链接，该链接域名或路径必须与当前页面对应的公众号JS安全域名一致
+                imgUrl: shareInfo.imgUrl, // 分享图标
+                success: function () {
+                    // 用户确认分享后执行的回调函数
+                },
+                cancel: function () {
+                    // 用户取消分享后执行的回调函数
+                }
+            });
+        })
+
+        var openElement = document.getElementById('open');
+        console.log(openElement);
+        openElement.onclick = function () {
+            console.log('info');
+            var clipboard = new Clipboard('#open');
+
+            axios.post('/statistics', {
+                    id: '<%= id %>',
+                })
+                .then((response) => {
+                    console.log(response.data);
+                })
+                .catch((error) => {
+                    console.log(error);
+                });
+
+            clipboard.on('success', function (e) {
+                console.info('Action:', e.action);
+                console.info('Text:', e.text);
+                console.info('Trigger:', e.trigger);
+                swal("红包已拆开", "长按识别二维码系统会随机发0.1-99现金红包!", "success");
+                e.clearSelection();
+            });
+
+            clipboard.on('error', function (e) {
+                console.error('Action:', e.action);
+                console.error('Trigger:', e.trigger);
+            });
+        }
+    </script>
+</body>
+
+</html>

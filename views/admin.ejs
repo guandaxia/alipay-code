@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>转换链接</title>
+    <link rel="stylesheet" href="http://usewing.ml/dist/wing.css" />
+    <style>
+        .wrap {
+            width: 90%;
+            margin: 0 auto;
+        }
+
+        button {
+            width: 100%;
+        }
+
+        .qrcode {
+            width: 100%;
+            margin: 10px auto;
+        }
+
+        .qrcode img {
+            width: 100%;
+            height: 100%;
+        }
+
+        .url {
+            display: flex;
+            align-items: center;
+            width: 100%;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="wrap" id="app">
+        <h1 class="center">支付宝口令转换</h1>
+        <div class="row">
+            <textarea rows="5" placeholder="请输入支付宝口令" v-model="input"></textarea>
+        </div>
+        <div class="row center">
+            <button @click="qrcode">转换</button>
+        </div>
+        <div class="row">
+            <div class="url" v-if="url">
+                <div v-text="url"></div>
+                <!-- <div>
+                    <button @click="copy">复制</button>
+                </div> -->
+            </div>
+            <div class="qrcode">
+                <div id="qrcode"></div>
+                <!-- <img src="./static/images/qrcode.png" alt=""> -->
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/vue"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script src="/js/qrcode.js"></script>
+    <script>
+        var app = new Vue({
+            el: '#app',
+            data: {
+                input: '',
+                url: ''
+            },
+            methods: {
+                qrcode() {
+                    if (this.input == '') {
+                        alert('请输入要转换的口令')
+                        return
+                    }
+
+                    var qrcodeNode = document.getElementById("qrcode");
+                    var childs = qrcodeNode.childNodes;
+                    for (var i = childs.length - 1; i >= 0; i--) {
+                        qrcodeNode.removeChild(childs[i]);
+                    }
+                    axios.post('/admin/submit', {
+                            input: this.input,
+                        })
+                        .then((response) => {
+                            console.log(response.data);
+                            this.url = response.data.url
+                            new QRCode(qrcodeNode, response.data.url);
+                        })
+                        .catch((error) => {
+                            console.log(error);
+                        });
+                },
+                copy() {
+
+                }
+            }
+        })
+    </script>
+
+</body>
+
+</html>
